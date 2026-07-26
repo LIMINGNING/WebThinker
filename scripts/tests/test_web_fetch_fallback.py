@@ -10,10 +10,13 @@ if SCRIPTS_DIR not in sys.path:
     sys.path.insert(0, SCRIPTS_DIR)
 
 from search.bing_search import (  # noqa: E402
+    DEFAULT_REFERER,
     WIKIMEDIA_USER_AGENT,
     extract_text_from_url_async,
     fetch_with_requests_fallback,
+    headers,
     request_headers_for_url,
+    session,
 )
 
 
@@ -24,11 +27,13 @@ class WebFetchFallbackTests(unittest.TestCase):
         )
         self.assertEqual(request_headers["User-Agent"], WIKIMEDIA_USER_AGENT)
         self.assertNotIn("Referer", request_headers)
+        self.assertNotIn("Referer", headers)
+        self.assertNotIn("Referer", session.headers)
 
     def test_other_domains_keep_existing_browser_headers(self):
         request_headers = request_headers_for_url("https://example.com/article")
         self.assertIn("Mozilla/5.0", request_headers["User-Agent"])
-        self.assertEqual(request_headers["Referer"], "https://www.google.com/")
+        self.assertEqual(request_headers["Referer"], DEFAULT_REFERER)
 
     def test_requests_fallback_runs_off_the_async_event_loop(self):
         import threading

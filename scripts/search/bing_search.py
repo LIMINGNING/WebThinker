@@ -30,13 +30,13 @@ headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
                   'AppleWebKit/537.36 (KHTML, like Gecko) '
                   'Chrome/58.0.3029.110 Safari/537.36',
-    'Referer': 'https://www.google.com/',
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
     'Accept-Language': 'en-US,en;q=0.5',
     'Connection': 'keep-alive',
     'Upgrade-Insecure-Requests': '1'
 }
 
+DEFAULT_REFERER = 'https://www.google.com/'
 WIKIMEDIA_USER_AGENT = (
     'WebThinkerResearchBot/0.1 '
     '(https://github.com/RUC-NLPIR/WebThinker; academic research)'
@@ -48,7 +48,8 @@ def request_headers_for_url(url: str) -> Dict[str, str]:
     hostname = (urlparse(url).hostname or '').lower()
     if hostname.endswith(('.wikipedia.org', '.wikimedia.org', '.wikimediafoundation.org')):
         request_headers['User-Agent'] = WIKIMEDIA_USER_AGENT
-        request_headers.pop('Referer', None)
+    else:
+        request_headers['Referer'] = DEFAULT_REFERER
     return request_headers
 
 
