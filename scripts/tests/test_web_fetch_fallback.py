@@ -31,9 +31,17 @@ class WebFetchFallbackTests(unittest.TestCase):
         self.assertEqual(request_headers["Referer"], "https://www.google.com/")
 
     def test_requests_fallback_runs_off_the_async_event_loop(self):
+        import threading
+
+        main_thread = threading.current_thread()
+
+        def fake_fetch(*args, **kwargs):
+            self.assertNotEqual(threading.current_thread(), main_thread)
+            return "fallback page text"
+
         with patch(
             "search.bing_search.extract_text_from_url",
-            return_value="fallback page text",
+            side_effect=fake_fetch,
         ) as fetch:
             result = asyncio.run(
                 fetch_with_requests_fallback(
