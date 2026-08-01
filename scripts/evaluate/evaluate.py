@@ -250,7 +250,7 @@ def evaluate_predictions(output, labeled_answer, mode='math', use_llm=False, que
     return final_metric, pred_answer
 
 
-def run_evaluation(filtered_data, input_list, output_list, task_type, output_dir, output_metrics_path, output_metrics_overall_path, use_llm=False, extract_answer=False, domain_fields=None, api_base_url=None, model_name=None):
+def run_evaluation(filtered_data, input_list, output_list, task_type, output_dir, output_metrics_path, output_metrics_overall_path, use_llm=False, extract_answer=False, domain_fields=None, api_base_url=None, model_name=None, api_key="empty"):
     # Initialize domain metrics dictionary
     domain_metrics = defaultdict(lambda: {
         'total': 0,
@@ -422,7 +422,8 @@ def run_evaluation(filtered_data, input_list, output_list, task_type, output_dir
                 pred_answers=pred_answers_for_llm,
                 extract_answer=extract_answer,
                 api_base_url=api_base_url,
-                model_name=model_name
+                model_name=model_name,
+                api_key=api_key
             ))
             
             # Update metrics with LLM results
@@ -492,14 +493,16 @@ if __name__ == "__main__":
     parser.add_argument('--extract_answer', action='store_true', help='Extract answer from output')
     parser.add_argument('--api_base_url', type=str, default=None, help='Base URL for LLM API')
     parser.add_argument('--model_name', type=str, default=None, help='Model name for LLM evaluation')
+    parser.add_argument('--api_key', type=str, default="empty", help='API key for LLM evaluation')
     args = parser.parse_args()
 
     # Define the list of domain field names to check (in order of priority)
     DOMAIN_FIELDS = ['Level', 'level', 'category', 'High-level domain', 'difficulty_level', 'field', 'problem_topic']
 
     output_path = args.output_path
-    output_metrics_path = output_path.replace('.json', '.metrics.json')
-    output_metrics_overall_path = output_path.replace('.json', '.metrics.overall.json')
+    output_dir = os.path.dirname(output_path) or "."
+    output_metrics_path = os.path.basename(output_path).replace('.json', '.metrics.json')
+    output_metrics_overall_path = os.path.basename(output_path).replace('.json', '.metrics.overall.json')
 
     # Load main output data
     with open(output_path, mode='r', encoding='utf-8') as file:
@@ -529,12 +532,13 @@ if __name__ == "__main__":
         input_list=input_list,
         output_list=output_list,
         task_type=args.task,
-        output_dir=output_path,
+        output_dir=output_dir,
         output_metrics_path=output_metrics_path,
         output_metrics_overall_path=output_metrics_overall_path,
         use_llm=args.use_llm,
         api_base_url=args.api_base_url,
         model_name=args.model_name,
+        api_key=args.api_key,
         extract_answer=args.extract_answer,
         domain_fields=DOMAIN_FIELDS  # Pass the domain fields to run_evaluation
     )

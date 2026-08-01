@@ -1,0 +1,11 @@
+aiohttp
+beautifulsoup4
+chardet
+lxml
+nltk==3.9.1
+numpy
+openai
+pdfplumber
+rank_bm25
+requests
+tqdm
